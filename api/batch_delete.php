@@ -32,6 +32,11 @@ try {
     $stmt = $db->query($sql, $ids);
     $affected = $stmt->rowCount();
 
+    AdminLog::record('invitation', 'batch_delete', '批量删除邀请码', array(
+        'count' => $affected,
+        'ids' => $ids,
+    ));
+
     Utils::success("成功删除{$affected}条记录", array('affected' => $affected));
 } catch (Exception $e) {
     Utils::error('批量删除失败: ' . $e->getMessage());

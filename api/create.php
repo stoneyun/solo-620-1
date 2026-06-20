@@ -2,6 +2,10 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../includes/Database.php';
 require_once __DIR__ . '/../includes/Utils.php';
+require_once __DIR__ . '/../includes/Auth.php';
+require_once __DIR__ . '/../includes/AdminLog.php';
+
+Auth::requirePermission('invitation:create');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Utils::error('请求方式错误');
@@ -42,6 +46,11 @@ try {
         'expire_at' => $expireAt,
         'used_by'   => null,
         'remark'    => $remark === '' ? null : $remark,
+    ));
+
+    AdminLog::record('invitation', 'create', '新增邀请码', array(
+        'id' => $insertId,
+        'code' => $code,
     ));
 
     Utils::success('添加成功', array('id' => $insertId, 'code' => $code));

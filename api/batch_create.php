@@ -43,6 +43,10 @@ try {
 
     $db->commit();
 
+    AdminLog::record('invitation', 'batch_create', '批量生成邀请码', array(
+        'count' => $successCount,
+    ));
+
     Utils::success("成功生成{$successCount}个邀请码", array('success_count' => $successCount));
 } catch (Exception $e) {
     if (isset($db) && method_exists($db, 'rollBack')) {

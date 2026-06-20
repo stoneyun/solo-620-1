@@ -2,6 +2,10 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../includes/Database.php';
 require_once __DIR__ . '/../includes/Utils.php';
+require_once __DIR__ . '/../includes/Auth.php';
+require_once __DIR__ . '/../includes/AdminLog.php';
+
+Auth::requirePermission('invitation:edit');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Utils::error('请求方式错误');
@@ -50,6 +54,10 @@ try {
         '`id` = :where_id',
         array(':where_id' => $id)
     );
+
+    AdminLog::record('invitation', 'update', '编辑邀请码', array(
+        'id' => $id,
+    ));
 
     Utils::success('更新成功', array('affected' => $affected));
 } catch (Exception $e) {

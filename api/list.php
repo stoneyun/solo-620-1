@@ -2,6 +2,10 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../includes/Database.php';
 require_once __DIR__ . '/../includes/Utils.php';
+require_once __DIR__ . '/../includes/Auth.php';
+require_once __DIR__ . '/../includes/AdminLog.php';
+
+Auth::requirePermission('invitation:view');
 
 try {
     $page      = max(1, (int)Utils::input('page', 1));

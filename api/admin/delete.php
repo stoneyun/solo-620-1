@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../includes/Database.php';
-require_once __DIR__ . '/../includes/Utils.php';
-require_once __DIR__ . '/../includes/Auth.php';
-require_once __DIR__ . '/../includes/AdminLog.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/Database.php';
+require_once __DIR__ . '/../../includes/Utils.php';
+require_once __DIR__ . '/../../includes/AdminLog.php';
+require_once __DIR__ . '/../../includes/Auth.php';
 
-Auth::requirePermission('invitation:delete');
+Auth::requirePermission('admin:delete');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Utils::error('请求方式错误');
@@ -18,31 +18,34 @@ try {
         Utils::error('无效的ID');
     }
 
+    if ($id === Auth::id()) {
+        Utils::error('不能删除自己');
+    }
+
     $db = Database::getInstance();
 
     $record = $db->fetchOne(
-        'SELECT id FROM `invitation_codes` WHERE `id` = :id AND `is_deleted` = 0 LIMIT 1',
+        'SELECT * FROM `admins` WHERE `id` = :id AND `is_deleted` = 0 LIMIT 1',
         array(':id' => $id)
     );
     if (!$record) {
         Utils::error('记录不存在或已删除');
     }
 
-    $codeRow = $db->fetchOne(
-        'SELECT code FROM `invitation_codes` WHERE `id` = :id LIMIT 1',
-        array(':id' => $id)
-    );
+    if ($record['is_super']) {
+        Utils::error('不能删除超级管理员');
+    }
 
     $affected = $db->update(
-        'invitation_codes',
+        'admins',
         array('is_deleted' => 1),
         '`id` = :where_id',
         array(':where_id' => $id)
     );
 
-    AdminLog::record('invitation', 'delete', '删除邀请码', array(
+    AdminLog::record('admin', 'delete', '删除管理员', array(
         'id' => $id,
-        'code' => $codeRow ? $codeRow['code'] : '',
+        'username' => $record['username'],
     ));
 
     Utils::success('删除成功', array('affected' => $affected));
